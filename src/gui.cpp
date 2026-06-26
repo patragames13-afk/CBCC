@@ -26,6 +26,10 @@ GtkWidget *text_comparison;
 int runGui(int argc, char* argv[])
 {
     gtk_init(&argc, &argv);
+
+    g_object_set(gtk_settings_get_default(),
+                 "gtk-application-prefer-dark-theme", TRUE, NULL);
+
     setup_css();
 
     main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
