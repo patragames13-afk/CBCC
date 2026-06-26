@@ -1,0 +1,20 @@
+# Build
+build/
+cmake-build-*/
+
+# Compiled
+*.o
+*.obj
+*.exe
+cbc_ballistics
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
