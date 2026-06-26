@@ -21,6 +21,7 @@ extern CannonSetup last_setup;
 
 gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data);
 void on_calculate(GtkWidget* widget, gpointer data);
+void on_barrel_changed(GtkComboBox* combo, gpointer data);
 void on_copy(GtkWidget* widget, gpointer data);
 void on_save_preset(GtkWidget* widget, gpointer data);
 void on_load_preset(GtkWidget* widget, gpointer data);

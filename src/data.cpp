@@ -13,8 +13,8 @@ const std::map<std::string, BallisticProperties> AMMO_TABLE = {
 };
 
 const std::map<std::string, BarrelMaterial> BARREL_TABLE = {
-    {"steel",        {"Steel",        0.025, 1.4,   1.0,   8}},
-    {"nethersteel",  {"Nethersteel",  0.02,  1.15,  0.667, 10}},
+    {"steel",        {"Steel",        0.025, 1.4,   1.0,   6}},
+    {"nethersteel",  {"Nethersteel",  0.02,  1.15,  0.667, 8}},
     {"bronze",       {"Bronze",       0.03,  1.4,   1.333, 4}},
     {"cast_iron",    {"Cast Iron",    0.05,  2.0,   2.0,   2}},
     {"wrought_iron", {"Wrought Iron", 0.1,   1.0,   2.0,   1}},

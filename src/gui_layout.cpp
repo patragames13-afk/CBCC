@@ -58,6 +58,7 @@ void build_input_grid(GtkWidget* box)
     for (const auto& [k, v] : BARREL_TABLE)
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_barrel), k.c_str());
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo_barrel), 0);
+    g_signal_connect(combo_barrel, "changed", G_CALLBACK(on_barrel_changed), NULL);
 
     add_lbl("Dim:", 4, 2);
     add_combo(combo_dim, 5, 2);

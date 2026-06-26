@@ -1,5 +1,6 @@
 #include "gui_state.h"
 #include "calculator.h"
+#include "data.h"
 #include <string>
 #include <cstdio>
 
@@ -108,4 +109,16 @@ void on_calculate(GtkWidget*, gpointer)
         comp.c_str(), -1);
 
     gtk_widget_queue_draw(drawing_area);
+}
+
+void on_barrel_changed(GtkComboBox* combo, gpointer)
+{
+    const char* key = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo));
+    auto it = BARREL_TABLE.find(key);
+    if (it != BARREL_TABLE.end()) {
+        int maxCharges = (int)it->second.maxSafePropellantStress;
+        gtk_spin_button_set_range(GTK_SPIN_BUTTON(spin_charges), 0, maxCharges);
+        if (gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin_charges)) > maxCharges)
+            gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin_charges), maxCharges);
+    }
 }
