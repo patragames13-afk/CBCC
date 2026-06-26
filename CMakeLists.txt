@@ -26,4 +26,4 @@ add_executable(cbc_ballistics
 target_include_directories(cbc_ballistics PRIVATE src)
 target_link_libraries(cbc_ballistics PRIVATE ${GTK3_LIBRARIES})
 target_include_directories(cbc_ballistics PRIVATE ${GTK3_INCLUDE_DIRS})
-target_compile_options(cbc_ballistics PRIVATE ${GTK3_CFLAGS_OTHER})
+target_compile_options(cbc_ballistics PRIVATE ${GTK3_CFLAGS_OTHER} -Wall -Wextra -Wpedantic -Wno-unused-parameter)

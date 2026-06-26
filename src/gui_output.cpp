@@ -10,7 +10,7 @@ static GtkWidget* add_traj_section(GtkWidget* box, const char* title,
     gtk_box_pack_start(GTK_BOX(box), frame, TRUE, TRUE, 0);
 
     GtkWidget* inner = gtk_grid_new();
-    gtk_grid_set_column_spacing(GTK_GRID(inner), 8);
+    gtk_grid_set_column_spacing(GTK_GRID(inner), 6);
     gtk_grid_set_row_spacing(GTK_GRID(inner), 2);
     gtk_container_add(GTK_CONTAINER(frame), inner);
 
@@ -32,9 +32,9 @@ static GtkWidget* add_traj_section(GtkWidget* box, const char* title,
     return frame;
 }
 
-void build_output_area(GtkWidget* box)
+void build_traj_stats(GtkWidget* box)
 {
-    GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 12);
+    GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
     gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 0);
 
     add_traj_section(hbox, "Low (direct)", label_low_pitch,
@@ -43,8 +43,8 @@ void build_output_area(GtkWidget* box)
                                           label_high_flight, label_high_apex);
 
     GtkWidget* stats = gtk_grid_new();
-    gtk_grid_set_column_spacing(GTK_GRID(stats), 8);
-    gtk_grid_set_row_spacing(GTK_GRID(stats), 2);
+    gtk_grid_set_column_spacing(GTK_GRID(stats), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(stats), 3);
     gtk_box_pack_start(GTK_BOX(box), stats, FALSE, TRUE, 0);
 
     auto add_stat = [&](const char* lbl, GtkWidget*& val, int col, int row) {
@@ -65,17 +65,21 @@ void build_output_area(GtkWidget* box)
     add_stat("Height Δ:", label_hdelta, 0, 1);
     add_stat("Muzzle V:", label_muzzle, 1, 1);
     add_stat("Spread:", label_spread, 2, 1);
+}
 
-    GtkWidget* comp_frame = gtk_frame_new("Ammo Comparison");
-    gtk_box_pack_start(GTK_BOX(box), comp_frame, FALSE, TRUE, 0);
+GtkWidget* build_comparison_frame()
+{
+    GtkWidget* frame = gtk_frame_new("Ammo Comparison");
 
     text_comparison = gtk_text_view_new();
     gtk_text_view_set_editable(GTK_TEXT_VIEW(text_comparison), FALSE);
     gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(text_comparison), FALSE);
     gtk_widget_set_name(text_comparison, "comparison");
-    gtk_widget_set_size_request(text_comparison, -1, 80);
 
     GtkWidget* scroll = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
+        GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_container_add(GTK_CONTAINER(scroll), text_comparison);
-    gtk_container_add(GTK_CONTAINER(comp_frame), scroll);
+    gtk_container_add(GTK_CONTAINER(frame), scroll);
+    return frame;
 }

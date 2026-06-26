@@ -8,93 +8,90 @@
 void on_copy(GtkWidget*, gpointer)
 {
     if (!last_result.valid) return;
-
-    std::string text;
-    text += "CBC Ballistics Report\n";
-    text += "=====================\n\n";
-
+    std::string text = "CBC Ballistics Report\n=====================\n\n";
     char buf[256];
-    snprintf(buf, sizeof(buf), "Yaw: %.1f° (CW from N)\n", last_result.yawDeg);
-    text += buf;
-    snprintf(buf, sizeof(buf), "3D Distance: %.1f m\n", last_result.distance3D);
-    text += buf;
-    snprintf(buf, sizeof(buf), "H Distance: %.1f m\n", last_result.hDist);
-    text += buf;
-    snprintf(buf, sizeof(buf), "Height Δ: %+.1f m\n", last_result.heightDelta);
-    text += buf;
-    snprintf(buf, sizeof(buf), "Muzzle V: %.1f (%.0f bl/s)\n",
-             last_result.muzzleVelocity,
-             last_result.muzzleVelocity * TICKS_PER_SEC);
-    text += buf;
-    snprintf(buf, sizeof(buf), "Spread: %.2f°\n", last_result.spread);
-    text += buf;
+
+    auto add = [&](const char* fmt, auto... args) {
+        snprintf(buf, sizeof(buf), fmt, args...);
+        text += buf;
+    };
+
+    add("Yaw: %.1f° (CW from N)\n", last_result.yawDeg);
+    add("3D Distance: %.1f m\n", last_result.distance3D);
+    add("H Distance: %.1f m\n", last_result.hDist);
+    add("Height Δ: %+.1f m\n", last_result.heightDelta);
+    add("Muzzle V: %.1f (%.0f bl/s)\n", last_result.muzzleVelocity, last_result.muzzleVelocity * TICKS_PER_SEC);
+    add("Spread: %.2f°\n", last_result.spread);
 
     if (last_result.low.valid) {
         text += "\n-- Low trajectory --\n";
-        snprintf(buf, sizeof(buf), "Pitch: %.1f°\n", last_result.low.pitchDeg);
-        text += buf;
-        snprintf(buf, sizeof(buf), "Flight: %.2f s\n", last_result.low.flightTimeSec);
-        text += buf;
-        snprintf(buf, sizeof(buf), "Apex: %.1f m\n", last_result.low.apexHeight);
-        text += buf;
+        add("Pitch: %.1f°\n", last_result.low.pitchDeg);
+        add("Flight: %.2f s\n", last_result.low.flightTimeSec);
+        add("Apex: %.1f m\n", last_result.low.apexHeight);
     }
     if (last_result.high.valid) {
         text += "\n-- High trajectory (mortar) --\n";
-        snprintf(buf, sizeof(buf), "Pitch: %.1f°\n", last_result.high.pitchDeg);
-        text += buf;
-        snprintf(buf, sizeof(buf), "Flight: %.2f s\n", last_result.high.flightTimeSec);
-        text += buf;
-        snprintf(buf, sizeof(buf), "Apex: %.1f m\n", last_result.high.apexHeight);
-        text += buf;
+        add("Pitch: %.1f°\n", last_result.high.pitchDeg);
+        add("Flight: %.2f s\n", last_result.high.flightTimeSec);
+        add("Apex: %.1f m\n", last_result.high.apexHeight);
     }
-
     text += "\n-- Ammo Comparison --\n";
     for (const auto& r : last_result.comparison) {
         if (r.valid)
-            snprintf(buf, sizeof(buf), "%s: pitch %.1f° flight %.2fs apex %.1fm\n",
-                     r.key.c_str(), r.pitch, r.flight, r.apex);
+            add("%s: pitch %.1f° flight %.2fs apex %.1fm\n", r.key.c_str(), r.pitch, r.flight, r.apex);
         else
-            snprintf(buf, sizeof(buf), "%s: %s\n", r.key.c_str(), r.error.c_str());
-        text += buf;
+            add("%s: %s\n", r.key.c_str(), r.error.c_str());
     }
-
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     gtk_clipboard_set_text(clip, text.c_str(), -1);
+}
+
+static CannonSetup read_ui()
+{
+    CannonSetup s;
+    auto rd = [](GtkWidget* w) {
+        const char* t = gtk_entry_get_text(GTK_ENTRY(w));
+        try { return std::stod(t); } catch (...) { return 0.0; }
+    };
+    s.cannonPos.x = rd(entry_cx);
+    s.cannonPos.y = rd(entry_cy);
+    s.cannonPos.z = rd(entry_cz);
+    s.targetPos.x = rd(entry_tx);
+    s.targetPos.y = rd(entry_ty);
+    s.targetPos.z = rd(entry_tz);
+    s.ammoKey   = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo_ammo));
+    s.barrelKey = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo_barrel));
+    s.dimKey    = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo_dim));
+    s.barrelLength = (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin_barrel_len));
+    s.numCharges   = (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin_charges));
+    return s;
 }
 
 void on_save_preset(GtkWidget*, gpointer)
 {
     GtkWidget* dialog = gtk_file_chooser_dialog_new(
-        "Save Preset", NULL, GTK_FILE_CHOOSER_ACTION_SAVE,
+        "Save Preset", GTK_WINDOW(main_window), GTK_FILE_CHOOSER_ACTION_SAVE,
         "_Cancel", GTK_RESPONSE_CANCEL,
         "_Save", GTK_RESPONSE_ACCEPT, NULL);
 
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
         char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        CannonSetup s = read_ui();
         std::ofstream f(path);
         if (f.is_open()) {
-            const auto& s = last_setup;
-            f << "cx=" << s.cannonPos.x << "\n";
-            f << "cy=" << s.cannonPos.y << "\n";
-            f << "cz=" << s.cannonPos.z << "\n";
-            f << "tx=" << s.targetPos.x << "\n";
-            f << "ty=" << s.targetPos.y << "\n";
-            f << "tz=" << s.targetPos.z << "\n";
-            f << "ammo=" << s.ammoKey << "\n";
-            f << "barrel=" << s.barrelKey << "\n";
-            f << "dim=" << s.dimKey << "\n";
-            f << "len=" << s.barrelLength << "\n";
-            f << "charges=" << s.numCharges << "\n";
+            f << "cx=" << s.cannonPos.x << "\ncy=" << s.cannonPos.y << "\ncz=" << s.cannonPos.z << "\n";
+            f << "tx=" << s.targetPos.x << "\nty=" << s.targetPos.y << "\ntz=" << s.targetPos.z << "\n";
+            f << "ammo=" << s.ammoKey << "\nbarrel=" << s.barrelKey << "\ndim=" << s.dimKey << "\n";
+            f << "len=" << s.barrelLength << "\ncharges=" << s.numCharges << "\n";
         }
         g_free(path);
     }
     gtk_widget_destroy(dialog);
 }
-
 void on_load_preset(GtkWidget*, gpointer)
 {
     GtkWidget* dialog = gtk_file_chooser_dialog_new(
-        "Load Preset", NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
+        "Load Preset", GTK_WINDOW(main_window), GTK_FILE_CHOOSER_ACTION_OPEN,
         "_Cancel", GTK_RESPONSE_CANCEL,
         "_Open", GTK_RESPONSE_ACCEPT, NULL);
 

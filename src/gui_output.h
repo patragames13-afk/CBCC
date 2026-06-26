@@ -1,4 +1,5 @@
 #pragma once
 #include <gtk/gtk.h>
 
-void build_output_area(GtkWidget* box);
+void build_traj_stats(GtkWidget* box);
+GtkWidget* build_comparison_frame();

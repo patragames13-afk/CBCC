@@ -2,6 +2,7 @@
 #include "types.h"
 #include <gtk/gtk.h>
 
+extern GtkWidget *main_window;
 extern GtkWidget *entry_cx, *entry_cy, *entry_cz;
 extern GtkWidget *entry_tx, *entry_ty, *entry_tz;
 extern GtkWidget *combo_ammo, *combo_barrel, *combo_dim;
@@ -22,6 +23,8 @@ extern CannonSetup last_setup;
 gboolean on_draw(GtkWidget* widget, cairo_t* cr, gpointer data);
 void on_calculate(GtkWidget* widget, gpointer data);
 void on_barrel_changed(GtkComboBox* combo, gpointer data);
+void on_paste_coords(GtkEditable* editable, const gchar* text,
+                     gint len, gint* pos, gpointer data);
 void on_copy(GtkWidget* widget, gpointer data);
 void on_save_preset(GtkWidget* widget, gpointer data);
 void on_load_preset(GtkWidget* widget, gpointer data);

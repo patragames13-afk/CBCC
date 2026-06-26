@@ -3,6 +3,8 @@
 #include "data.h"
 #include <string>
 #include <cstdio>
+#include <sstream>
+#include <vector>
 
 void on_calculate(GtkWidget*, gpointer)
 {
@@ -111,6 +113,30 @@ void on_calculate(GtkWidget*, gpointer)
     gtk_widget_queue_draw(drawing_area);
 }
 
+void on_paste_coords(GtkEditable* editable, const gchar* text,
+                      gint, gint*, gpointer)
+{
+    std::string s(text);
+    if (s.find(' ') == std::string::npos) return;
+
+    std::vector<std::string> parts;
+    std::stringstream ss(s);
+    std::string p;
+    while (ss >> p) parts.push_back(p);
+    if (parts.size() != 3) return;
+
+    GtkWidget* entries[3];
+    if (editable == GTK_EDITABLE(entry_cx) ||
+        editable == GTK_EDITABLE(entry_cy) ||
+        editable == GTK_EDITABLE(entry_cz)) {
+        entries[0] = entry_cx; entries[1] = entry_cy; entries[2] = entry_cz;
+    } else {
+        entries[0] = entry_tx; entries[1] = entry_ty; entries[2] = entry_tz;
+    }
+    for (int i = 0; i < 3; ++i)
+        gtk_entry_set_text(GTK_ENTRY(entries[i]), parts[i].c_str());
+    g_signal_stop_emission_by_name(editable, "insert-text");
+}
 void on_barrel_changed(GtkComboBox* combo, gpointer)
 {
     const char* key = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo));
